@@ -1,0 +1,38 @@
+name: marvel-comics-shop
+recipe: symfony
+config:
+  php: '8.3'
+  xdebug: false  # Disable xdebug by default
+  webroot: htdocs/public
+services:
+  appserver:
+    type: php:8.3
+    xdebug: true  # Enable xdebug only if necessary
+    build_as_root:
+      - apt-get update -y
+      - apt-get install -y procps
+  database:
+    type: mysql:8.0
+    creds:
+      user: marvel
+      password: marvel
+      database: marvel
+  phpmyadmin:
+    type: phpmyadmin
+proxy:
+  appserver:
+    - 'marvel-comics-shop.lndo.site'
+  phpmyadmin:
+    - 'phpmyadmin.marvel-comics-shop.lndo.site'
+tooling:
+  composer:
+    service: appserver
+    cmd: composer
+    dir: /app/htdocs
+  console:
+    service: appserver
+    cmd: bin/console
+    dir: /app/htdocs
+  yarn:
+    service: node
+    dir: /app/htdocs
