@@ -1,6 +1,12 @@
 monolog:
-    channels:
-        - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
+    channels: ['marvel']
+
+    handlers:
+        roadtrip:
+            type: stream
+            path: '%kernel.logs_dir%/marvel.log'
+            level: debug
+            channels: ['marvel']
 
 when@dev:
     monolog:

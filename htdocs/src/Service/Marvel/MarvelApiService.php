@@ -3,33 +3,39 @@
 namespace App\Service\Marvel;
 
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use App\Service\Logger\LoggerService;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class MarvelApiService
 {
-    private $client;
-    private $publicKey;
-    private $privateKey;
-
-    public function __construct(HttpClientInterface $client, string $publicKey, string $privateKey)
-    {
-        $this->client = $client;
-        $this->publicKey = $publicKey;
-        $this->privateKey = $privateKey;
-    }
+    public function __construct(
+        private readonly HttpClientInterface $client,
+        private readonly string $publicKey,
+        private readonly string $privateKey,
+        private readonly LoggerService $logger
+    ) {}
 
     public function marvelApiCall(string $endpoint, array $queryParams = []): array
     {
         $ts = time();
-        $hash = md5($ts . $this->privateKey . $this->publicKey);
-
         $queryParams['ts'] = $ts;
         $queryParams['apikey'] = $this->publicKey;
-        $queryParams['hash'] = $hash;
+        $queryParams['hash'] = md5($ts . $this->privateKey . $this->publicKey);
 
-        $response = $this->client->request('GET', 'https://gateway.marvel.com:443/v1/public/' . $endpoint, [
-            'query' => $queryParams,
-        ]);
+        try {
+            $response = $this->client->request('GET', 'https://gateway.marvel.com:443/v1/public/' . $endpoint, [
+                'query' => $queryParams,
+            ]);
 
-        return $response->toArray();
+            if ($response->getStatusCode() !== 200) {
+                throw new HttpException($response->getStatusCode(), 'Marvel API call failed with status code ' . $response->getStatusCode());
+            }
+
+            return $response->toArray();
+
+        } catch (\Exception $e) {
+            $this->logger->logError('Error fetching data from Marvel API: ' . $e->getMessage());
+            return null;
+        }
     }
 }

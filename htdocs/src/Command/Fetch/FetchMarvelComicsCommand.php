@@ -10,10 +10,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'app:fetch:marvel-comics',
-    description: 'Import data using the Marvel API',
+    description: 'Fetch and process Marvel comics data using the Marvel API',
 )]
 class FetchMarvelComicsCommand extends Command
 {
+    private const COMIC_FETCH_LIMIT = 150;
+
     public function __construct(
         private readonly MarvelComicService $marvelComicService,
     ) {
@@ -22,61 +24,31 @@ class FetchMarvelComicsCommand extends Command
 
     protected function configure(): void
     {
-        $this->setDescription('This command will import Marvel comics from marvel api');
+        $this->setDescription('This command will fetch and process Marvel comics from the Marvel API and create a message for each comic');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        // Fetch comics from the Marvel API
-        $allComics = $this->marvelComicService->fetchComics(500);
+        $processedComicCount = $this->marvelComicService->processComics(self::COMIC_FETCH_LIMIT);
 
-        if (empty($allComics)) {
+        if ($processedComicCount === 0) {
             return $this->outputFailed($output);
         }
 
-        foreach ($allComics as $comic) {
-            // TODO: reate a message for each comic
-            $output->writeln('ID: ' . $comic['id'] . ' | Title: ' . $comic['title'] . ' | Thumbnail: ' . $comic['thumbnail']['path'] . '.' . $comic['thumbnail']['extension']);
-        }
-
-        $output->writeln('<fg=green>Total Comics Found: ' . count($allComics) . '</>');
+        $output->writeln('<fg=green>Total Comics Processed: ' . $processedComicCount . '</>');
 
         return $this->outputSuccess($output);
     }
 
-    private function outputFailed($output): int
+    private function outputFailed(OutputInterface $output): int
     {
-        $output->writeln([
-            '<fg=red>No Comics Found!</>',
-            '<fg=red>=============================================</>',
-            '<fg=red> /$$$$$$$$       /$$ /$$                 /$$</>',
-            '<fg=red>| $$_____/      |__/| $$                | $$</>',
-            '<fg=red>| $$    /$$$$$$  /$$| $$  /$$$$$$   /$$$$$$$</>',
-            '<fg=red>| $$$$$|____  $$| $$| $$ /$$__  $$ /$$__  $$</>',
-            '<fg=red>| $$__/ /$$$$$$$| $$| $$| $$$$$$$$| $$  | $$</>',
-            '<fg=red>| $$   /$$__  $$| $$| $$| $$_____/| $$  | $$</>',
-            '<fg=red>| $$  |  $$$$$$$| $$| $$|  $$$$$$$|  $$$$$$$</>',
-            '<fg=red>|__/   \_______/|__/|__/ \_______/ \_______/</>',
-        ]);
-
+        $output->writeln('<fg=red>No Comics Found!</>');
         return Command::FAILURE;
     }
 
-    private function outputSuccess($output): int
+    private function outputSuccess(OutputInterface $output): int
     {
-        $output->writeln([
-            '<fg=green>Comics successfully imported!</>',
-            '<fg=green>=======================================================================</>',
-            '<fg=green> /$$$$$$</>',
-            '<fg=green>/$$__  $$</>',                                                          
-            '<fg=green>| $$  \__/ /$$   /$$  /$$$$$$$  /$$$$$$$  /$$$$$$   /$$$$$$$ /$$$$$$$</>',
-            '<fg=green>|  $$$$$$ | $$  | $$ /$$_____/ /$$_____/ /$$__  $$ /$$_____//$$_____</>',
-            '<fg=green>\____  $$| $$  | $$| $$      | $$      | $$$$$$$$|  $$$$$$|  $$$$$$</>', 
-            '<fg=green>/$$  \ $$| $$  | $$| $$      | $$      | $$_____/ \____  $$\____  $$</>',
-            '<fg=green>|  $$$$$$/|  $$$$$$/|  $$$$$$$|  $$$$$$$|  $$$$$$$ /$$$$$$$//$$$$$$$/</>',
-            '<fg=green>\______/  \______/  \_______/ \_______/ \_______/|_______/|_______/</>',
-        ]);
-
+        $output->writeln('<fg=green>Comics successfully imported!</>');
         return Command::SUCCESS;
     }
 }
