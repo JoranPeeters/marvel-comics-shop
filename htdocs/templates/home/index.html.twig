@@ -1,1 +1,75 @@
-<h1>Hello Comics Shop</h1>
+{% extends 'base.html.twig' %}
+
+{% block title %}Marvel Comics Collection{% endblock %}
+
+{% block body %}
+<!-- Page Title -->
+<h1 class="text-4xl text-gray-800 font-extrabold text-start mb-16 tracking-wide">Discover Our Marvel Comic Collection</h1>
+
+<!-- Comics Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-12">
+    {% for comic in comics %}
+        <!-- Comic Card -->
+        <div class="flex flex-col shadow-md hover:shadow-lg transition-all duration-300 h-full bg-gray-100">
+            <!-- Comic Image -->
+            <div class="relative">
+                <img src="{{ comic.thumbnail }}" alt="{{ comic.title }}" class="w-full h-80 object-cover transition-opacity duration-300">
+            </div>
+
+            <!-- Comic Details (Flex column with justify-between to keep buttons at bottom) -->
+            <div class="p-4 flex flex-col justify-between flex-1">
+                <!-- Comic Title and Description -->
+                <div class="mb-4">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-1">{{ comic.title }}</h2>
+                    <p class="text-gray-600 text-sm">{{ comic.description|slice(0, 80) }}{% if comic.description|length > 80 %}...{% endif %}</p>
+                </div>
+
+                <!-- Price and Buttons -->
+                <div class="mt-auto">
+                    <!-- Price -->
+                    <p class="text-lg font-bold text-gray-800 mb-3">${{ comic.price }}</p>
+
+                    <!-- Buttons -->
+                    <div class="flex space-x-2">
+                        <!-- View Details Button -->
+                        <a href="{{ path('app_comic_detail', { id: comic.id }) }}" class="w-1/2 text-center bg-gray-700 text-white py-2 hover:bg-gray-800 transition duration-300 font-medium">
+                            View Details
+                        </a>
+
+                        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                            <!-- Add to Cart Button (Only visible for logged-in users) -->
+                            <a href="{{ path('app_shopping_cart_add', { comicId: comic.id }) }}" class="w-1/2 text-center bg-blue-600 text-white py-2 hover:bg-blue-700 transition duration-300 font-medium">
+                                Add to Cart
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <p class="col-span-full text-center text-gray-500">No comics found.</p>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+<div class="mt-16 flex justify-center space-x-2">
+    {% if currentPage > 1 %}
+        <a href="{{ path('app_home', {'page': currentPage - 1}) }}" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 transition duration-200">
+            Previous
+        </a>
+    {% endif %}
+
+    {% for page in 1..totalPages %}
+        <a href="{{ path('app_home', {'page': page}) }}" 
+           class="px-4 py-2 {{ page == currentPage ? 'bg-blue-600 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-800' }} transition duration-200">
+            {{ page }}
+        </a>
+    {% endfor %}
+
+    {% if currentPage < totalPages %}
+        <a href="{{ path('app_home', {'page': currentPage + 1}) }}" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 transition duration-200">
+            Next
+        </a>
+    {% endif %}
+</div>
+{% endblock %}

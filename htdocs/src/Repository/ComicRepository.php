@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Comic;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * @extends ServiceEntityRepository<Comic>
@@ -54,5 +55,16 @@ class ComicRepository extends ServiceEntityRepository
     public function comicExists(int $marvelId): bool
     {
         return $this->findOneBy(['marvelId' => $marvelId]) !== null;
+    }
+
+    public function findAllWithPagination(int $page, int $comicsPerPage = 20): Paginator
+    {
+        $query = $this->createQueryBuilder('c')
+            ->orderBy('c.id', 'ASC')
+            ->getQuery()
+            ->setFirstResult(($page - 1) * $comicsPerPage) // Offset
+            ->setMaxResults($comicsPerPage); // Limit
+
+        return new Paginator($query);
     }
 }

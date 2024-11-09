@@ -28,7 +28,7 @@ class Comic
     private ?int $pageCount = null;
 
     #[ORM\Column(nullable: false)]
-    private ?int $price = null;
+    private ?float $price = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dateOnSale = null;
@@ -111,12 +111,12 @@ class Comic
         return $this;
     }
 
-    public function getPrice(): ?int
+    public function getPrice(): ?float
     {
         return $this->price;
     }
 
-    public function setPrice(?int $price): static
+    public function setPrice(?float $price): static
     {
         $this->price = $price;
 
