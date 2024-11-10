@@ -24,7 +24,7 @@ class ComicMessageHandler
             return;
         }
 
-        $this->comicRepository->comicAdd($comic);
+        $this->comicRepository->addComic($comic);
         $this->logger->info("Comic with Marvel ID {$comic['marvel_id']} added successfully.");
     }
 }

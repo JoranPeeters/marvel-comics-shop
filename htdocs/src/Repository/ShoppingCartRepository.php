@@ -11,6 +11,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ShoppingCartRepository extends ServiceEntityRepository
 {
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, ShoppingCart::class);
@@ -30,16 +31,6 @@ class ShoppingCartRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 
-    public function findCartByUser($user)
-    {
-        return $this->createQueryBuilder('sc')
-            ->andWhere('sc.user = :user')
-            ->andWhere('sc.deletedAt IS NULL')
-            ->setParameter('user', $user)
-            ->getQuery()
-            ->getResult();
-    }
-
     public function addComicToCart($user, $comic, $quantity = 1): ShoppingCart
     {
         $cartItem = $this->findOneBy(['user' => $user, 'comic' => $comic, 'deletedAt' => null]);
@@ -57,5 +48,11 @@ class ShoppingCartRepository extends ServiceEntityRepository
         $this->flush();
 
         return $cartItem;
+    }
+
+    public function remove(ShoppingCart $cartItem): void
+    {
+        $cartItem->setDeletedAt(new \DateTime());
+        $this->flush();
     }
 }

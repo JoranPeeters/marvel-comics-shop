@@ -7,13 +7,10 @@ use App\Repository\ComicRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 class HomeController extends AbstractController
 {
-    public function __construct(
-        private readonly TranslatorInterface $translator,
-    ) {}
+    public function __construct() {}
 
     #[Route('/', name: 'app_home')]
     public function index(ComicRepository $comicRepository, Request $request): Response

@@ -4,7 +4,8 @@
 
 {% block body %}
 <div class="max-w-4xl mx-auto bg-gray-100 p-8 shadow-lg">
-    <!-- Back Link at the Top Left -->
+    
+    <!-- Back to Comics Link -->
     <a href="{{ path('app_home') }}" class="text-gray-700 hover:text-gray-400 transition duration-200">
         ← Back to Comics
     </a>
@@ -13,6 +14,7 @@
     <h1 class="text-3xl font-extrabold text-gray-800 my-10 text-left">{{ comic.title }}</h1>
 
     <div class="flex flex-col md:flex-row gap-8">
+
         <!-- Comic Image -->
         <img src="{{ comic.thumbnail }}" alt="{{ comic.title }} thumbnail" class="object-cover shadow-md w-full md:w-1/2">
 
@@ -34,6 +36,7 @@
                     Add to Cart
                 </a>
             {% endif %}
+
         </div>
     </div>
 </div>

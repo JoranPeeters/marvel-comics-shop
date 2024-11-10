@@ -17,7 +17,7 @@ class ComicRepository extends ServiceEntityRepository
         parent::__construct($registry, Comic::class);
     }
 
-    public function comicAdd(array $comicData): Void
+    public function addComic(array $comicData): Void
     {
         $comic = new Comic();
         $comic->setMarvelId($comicData['marvel_id']);

@@ -35,16 +35,16 @@ class ShoppingCartController extends AbstractController
     public function add(int $comicId, Request $request): Response
     {
         $user = $this->getUser();
-        $quantity = $request->query->getInt('quantity', 1); // Default to 1 if not specified
-
+        $quantity = $request->query->getInt('quantity', 1);
         $comic = $this->comicRepository->find($comicId);
+
         if (!$comic) {
             throw $this->createNotFoundException('Comic not found.');
         }
 
         $cartItem = $this->shoppingCartRepository->addComicToCart($user, $comic, $quantity);
-
         $this->addFlash('success', "{$comic->getTitle()} has been added to your shopping cart.");
+
         return $this->redirectToRoute('app_shopping_cart_index');
     }
 
@@ -53,16 +53,15 @@ class ShoppingCartController extends AbstractController
     public function remove(int $comicId): Response
     {
         $user = $this->getUser();
-
         $cartItem = $this->shoppingCartRepository->findOneBy(['user' => $user, 'comic' => $comicId, 'deletedAt' => null]);
+
         if (!$cartItem) {
             throw $this->createNotFoundException('Comic not found in your shopping cart.');
         }
 
-        $cartItem->setDeletedAt(new \DateTime()); // Soft delete by setting deletedAt
-        $this->shoppingCartRepository->flush();
-
+        $this->shoppingCartRepository->remove($cartItem);
         $this->addFlash('success', "{$cartItem->getComic()->getTitle()} has been removed from your shopping cart.");
+
         return $this->redirectToRoute('app_shopping_cart_index');
     }
 }
