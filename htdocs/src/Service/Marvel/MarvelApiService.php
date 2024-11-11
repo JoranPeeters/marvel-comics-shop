@@ -15,7 +15,7 @@ class MarvelApiService
         private readonly LoggerService $logger
     ) {}
 
-    public function marvelApiCall(string $endpoint, array $queryParams = []): array
+    public function marvelApiCall(string $endpoint, array $queryParams = []): ?array
     {
         $ts = time();
         $queryParams['ts'] = $ts;

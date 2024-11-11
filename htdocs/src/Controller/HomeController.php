@@ -10,16 +10,19 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class HomeController extends AbstractController
 {
-    public function __construct() {}
+    private const COMICS_PER_PAGE = 20;
+
+    public function __construct(
+        private readonly ComicRepository $comicRepository
+    ) {}
 
     #[Route('/', name: 'app_home')]
-    public function index(ComicRepository $comicRepository, Request $request): Response
+    public function index(Request $request): Response
     {
-        $page = max(1, $request->query->getInt('page', 1));
-        $comicsPerPage = 20;
+        $page = $request->query->getInt('page', 1);
 
-        $paginator = $comicRepository->findAllWithPagination($page, $comicsPerPage);
-        $totalPages = ceil(count($paginator) / $comicsPerPage);
+        $paginator = $this->comicRepository->findAllWithPagination($page, SELF::COMICS_PER_PAGE);
+        $totalPages = ceil(count($paginator) / SELF::COMICS_PER_PAGE);
 
         return $this->render('home/index.html.twig', [
             'comics' => $paginator,

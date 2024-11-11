@@ -39,43 +39,40 @@ class MarvelComicService
             'noVariants' => true
         ];
 
-        do {
-            $queryParams['offset'] = $offset;
-            $queryParams['limit'] = min($limit, $totalComics - $offset);
-            $comics = $this->marvelApiService->marvelApiCall('comics', $queryParams);
-
-            if ($comics === null) {
-                $this->loggerService->logWarning('Skipped comics at offset ' . $offset . ' due to API error');
+        try {
+            do {
+                $queryParams['offset'] = $offset;
+                $queryParams['limit'] = min($limit, $totalComics - $offset);
+                $comics = $this->marvelApiService->marvelApiCall('comics', $queryParams);
+    
+                if ($comics === null || !isset($comics['data']['results'])) {
+                    $this->loggerService->logError('No comics found at offset ' . $offset);
+                    break;
+                }
+    
+                $allComics = array_merge($allComics, $comics['data']['results']);
+                $this->loggerService->logInfo('Successfully fetched ' . count($comics['data']['results']) . ' comics from Marvel API');
                 $offset += $limit;
-                continue;
-            }
-
-            if (empty($comics['data']['results'])) {
-                $this->loggerService->logWarning('No comics found at offset ' . $offset);
-                $offset += $limit;
-                continue;
-            }
-
-            $allComics = array_merge($allComics, $comics['data']['results']);
-            $this->loggerService->logInfo('Successfully fetched ' . count($comics['data']['results']) . ' comics from Marvel API');
-
-            $offset += $limit;
-            usleep(50000);
-
-        } while($offset < $totalComics);
-
-        return $allComics;
+    
+            } while($offset < $totalComics);
+    
+            return $allComics;
+            
+        } catch (\Exception $e) {
+            $this->loggerService->logError('Failed to fetch total comics count from Marvel API: ' . $e->getMessage());
+            return [];
+        }
     }
 
     private function formatComicData(array $comic): array
     {
         $formattedComic = [
             'marvel_id' => $comic['id'],
-            'title' => $comic['title'] ?? 'No title available',
-            'description' => empty($comic['description']) ? 'No description available' : $comic['description'],
+            'title' => $comic['title'],
+            'description' => empty($comic['description']) ? '' : $comic['description'],
             'page_count' => $comic['pageCount'] ?? 0,
             'date_on_sale' => $this->getDate($comic['dates'], 'onsaleDate'),
-            'price' => $comic['prices'][0]['price'] ?? 0,
+            'price' => $comic['prices'][0]['price'] ?? 0.00,
             'creators' => $this->getCreators($comic['creators']),
             'thumbnail' => $comic['thumbnail']['path'] . '.' . $comic['thumbnail']['extension']
         ];

@@ -39,10 +39,11 @@ class ShoppingCartController extends AbstractController
         $comic = $this->comicRepository->find($comicId);
 
         if (!$comic) {
-            throw $this->createNotFoundException('Comic not found.');
+            $this->addFlash('error', "Comic not found to add to shopping cart");
+            return $this->redirectToRoute('app_shopping_cart_index');
         }
 
-        $cartItem = $this->shoppingCartRepository->addComicToCart($user, $comic, $quantity);
+        $this->shoppingCartRepository->addComicToCart($user, $comic, $quantity);
         $this->addFlash('success', "{$comic->getTitle()} has been added to your shopping cart.");
 
         return $this->redirectToRoute('app_shopping_cart_index');
@@ -56,7 +57,8 @@ class ShoppingCartController extends AbstractController
         $cartItem = $this->shoppingCartRepository->findOneBy(['user' => $user, 'comic' => $comicId, 'deletedAt' => null]);
 
         if (!$cartItem) {
-            throw $this->createNotFoundException('Comic not found in your shopping cart.');
+            $this->addFlash('error', "Cannot remove comic from shopping cart");
+            return $this->redirectToRoute('app_shopping_cart_index');
         }
 
         $this->shoppingCartRepository->remove($cartItem);
