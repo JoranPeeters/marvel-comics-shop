@@ -21,11 +21,11 @@ class HomeController extends AbstractController
     {
         $page = $request->query->getInt('page', 1);
 
-        $paginator = $this->comicRepository->findAllWithPagination($page, SELF::COMICS_PER_PAGE);
-        $totalPages = ceil(count($paginator) / SELF::COMICS_PER_PAGE);
+        $comics = $this->comicRepository->findAllWithPagination($page, SELF::COMICS_PER_PAGE);
+        $totalPages = ceil(count($comics) / SELF::COMICS_PER_PAGE);
 
         return $this->render('home/index.html.twig', [
-            'comics' => $paginator,
+            'comics' => $comics,
             'currentPage' => $page,
             'totalPages' => $totalPages,
         ]);
