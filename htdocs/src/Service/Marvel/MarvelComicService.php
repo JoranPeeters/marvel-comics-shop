@@ -8,7 +8,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 
 class MarvelComicService
 {
-    private const COMIC_FETCH_BATCH_SIZE = 10; // Maximum of 50 comics per batch
+    private const COMIC_FETCH_BATCH_SIZE = 10;
 
     public function __construct(
         private readonly MarvelApiService $marvelApiService,
